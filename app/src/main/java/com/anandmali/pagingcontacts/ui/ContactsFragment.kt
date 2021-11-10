@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import com.anandmali.pagingcontacts.databinding.FragmentFirstBinding
+import com.anandmali.pagingcontacts.databinding.FragmentContactsBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -16,7 +16,7 @@ class ContactsFragment : Fragment() {
 
     private val viewModel: ContactsViewModel by viewModels()
 
-    private var _binding: FragmentFirstBinding? = null
+    private var _binding: FragmentContactsBinding? = null
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -27,7 +27,7 @@ class ContactsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
 
-        _binding = FragmentFirstBinding.inflate(inflater, container, false)
+        _binding = FragmentContactsBinding.inflate(inflater, container, false)
         return binding.root
 
     }
@@ -37,11 +37,11 @@ class ContactsFragment : Fragment() {
 
         viewModel.loadContacts()
 
-        val adapter = ContactsAdapter()
-        binding.rvContactList.adapter = adapter
+        val contactsAdapter = ContactsAdapter()
+        binding.rvContactList.adapter = contactsAdapter
         viewModel.contactsList.observe(viewLifecycleOwner, {
             lifecycleScope.launch {
-                adapter.submitData(it)
+                contactsAdapter.submitData(it)
             }
         })
     }
