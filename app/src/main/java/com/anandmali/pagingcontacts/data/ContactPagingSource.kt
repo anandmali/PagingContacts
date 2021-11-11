@@ -6,6 +6,8 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import javax.inject.Inject
 
+private const val PAGING_INDEX = 1
+
 class ContactPagingSource @Inject constructor(
     private val contentResolver: ContentResolver
 ) : PagingSource<Int, Contact>() {
@@ -16,7 +18,14 @@ class ContactPagingSource @Inject constructor(
     )
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Contact> {
-        val position = params.key ?: 1
+
+        //Current paging index position
+        val position = params.key ?: PAGING_INDEX
+
+        /**
+         * Contacts source : ContactsContract
+         * Thi can be source of Network, Room DB, or any source providing the paginated data
+         */
         val cursor = contentResolver.query(
             ContactsContract.Contacts.CONTENT_URI,
             contactsProjection,
@@ -25,8 +34,8 @@ class ContactPagingSource @Inject constructor(
             ContactsContract.Contacts.PHONETIC_NAME + " ASC LIMIT " + params.loadSize + " OFFSET " + position
         )
 
+        //Read contacts from : ContactsContract
         val contacts: MutableList<Contact> = mutableListOf()
-
         cursor?.let {
             it.moveToFirst()
             while (!it.isAfterLast) {
@@ -38,20 +47,31 @@ class ContactPagingSource @Inject constructor(
             it.close()
         }
 
-        val nextKey = if (contacts.size < 4) {
+        //Create next paging index
+        val nextKey = if (contacts.size < PAGING_SIZE) {
             null
         } else {
-            position + (params.loadSize / 4)
+            /**
+             * By default initial pageSize = 3 * [PAGING_SIZE]
+             * If needed this can be changed using : PagingConfig.initialLoadSize
+             */
+            position + (params.loadSize / PAGING_SIZE)
         }
 
+        //Create a load paging result for PagingData
         return LoadResult.Page(
-            data = contacts,
-            prevKey = if (position == 1) null else position - 1,
-            nextKey = nextKey
+            data = contacts, //Set adapter data
+            prevKey = if (position == 1) null else position - 1, //Previous index
+            nextKey = nextKey //Next index
         )
     }
 
     override fun getRefreshKey(state: PagingState<Int, Contact>): Int? {
+        /**
+         * This refresh key is required for next new paging source,
+         * whenever current existing paging source is invalidated,
+         * helpful for refresh mechanism on data update
+         */
         TODO("Not yet implemented")
     }
 }

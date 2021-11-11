@@ -1,5 +1,6 @@
 package com.anandmali.pagingcontacts.ui
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,16 +10,16 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.anandmali.pagingcontacts.databinding.FragmentContactsBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class ContactsFragment : Fragment() {
 
     private val viewModel: ContactsViewModel by viewModels()
-
     private var _binding: FragmentContactsBinding? = null
-
     private val binding get() = _binding!!
+    private val contactsAdapter = ContactsAdapter()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -33,16 +34,42 @@ class ContactsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.loadContacts()
-
-        val contactsAdapter = ContactsAdapter()
         binding.rvContactList.adapter = contactsAdapter
+        loadContactsFlow()
+    }
 
-        viewModel.loadContacts().observe(viewLifecycleOwner, {
+    /**
+     * Load paging contacts using LiveData
+     */
+    private fun loadContactsLiveData() {
+        viewModel.loadContactsLiveData().observe(viewLifecycleOwner, {
             lifecycleScope.launch {
                 contactsAdapter.submitData(it)
             }
         })
+    }
+
+    /**
+     * Load paging contacts using RxJava Observable
+     */
+    @SuppressLint("CheckResult")
+    private fun loadContactsObservable() {
+        viewModel.loadContactsObservable().subscribe {
+            lifecycleScope.launch {
+                contactsAdapter.submitData(it)
+            }
+        }
+    }
+
+    /**
+     * Load contacts using Kotlin Flow
+     */
+    private fun loadContactsFlow() {
+        lifecycleScope.launch {
+            viewModel.loadContactsFlow().collectLatest {
+                contactsAdapter.submitData(it)
+            }
+        }
     }
 
     override fun onDestroyView() {

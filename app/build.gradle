@@ -52,17 +52,14 @@ dependencies {
     def hilt_version = "2.35.1"
     implementation "com.google.dagger:hilt-android:$hilt_version"
     kapt "com.google.dagger:hilt-compiler:$hilt_version"
-
     implementation "androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha03"
     kapt "androidx.hilt:hilt-compiler:1.0.0"
 
     implementation 'android.arch.lifecycle:extensions:1.1.1'
+    implementation "androidx.activity:activity-ktx:1.4.0"
 
-    // Activity KTX for viewModels()
-    implementation "androidx.activity:activity-ktx:1.2.3"
-
+    def paging_version = "3.0.1"
     implementation "androidx.paging:paging-runtime-ktx:3.0.1"
+    implementation "androidx.paging:paging-rxjava2-ktx:$paging_version"
 
-    // alternatively - without Android dependencies for tests
-    testImplementation "androidx.paging:paging-common-ktx:3.0.1"
 }
