@@ -8,6 +8,6 @@
     <fragment
         android:id="@+id/ContactsFragment"
         android:name="com.anandmali.pagingcontacts.ui.ContactsFragment"
-        android:label="@string/first_fragment_label"
+        android:label="@string/contacts_fragment_label"
         tools:layout="@layout/fragment_contacts" />
 </navigation>

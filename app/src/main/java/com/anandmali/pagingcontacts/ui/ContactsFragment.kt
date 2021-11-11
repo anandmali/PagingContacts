@@ -18,8 +18,6 @@ class ContactsFragment : Fragment() {
 
     private var _binding: FragmentContactsBinding? = null
 
-    // This property is only valid between onCreateView and
-    // onDestroyView.
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -39,7 +37,8 @@ class ContactsFragment : Fragment() {
 
         val contactsAdapter = ContactsAdapter()
         binding.rvContactList.adapter = contactsAdapter
-        viewModel.contactsList.observe(viewLifecycleOwner, {
+
+        viewModel.loadContacts().observe(viewLifecycleOwner, {
             lifecycleScope.launch {
                 contactsAdapter.submitData(it)
             }

@@ -10,7 +10,7 @@ import javax.inject.Inject
 class ContactRepository @Inject constructor(
     private val contactPagingSource: ContactPagingSource
 ) {
-    fun getContactStream(): LiveData<PagingData<Contact>> {
+    fun getContacts(): LiveData<PagingData<Contact>> {
         return Pager(
             config = PagingConfig(pageSize = 10, enablePlaceholders = false),
             pagingSourceFactory = { contactPagingSource }

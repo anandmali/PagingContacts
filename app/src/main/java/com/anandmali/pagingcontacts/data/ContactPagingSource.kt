@@ -22,7 +22,7 @@ class ContactPagingSource @Inject constructor(
             contactsProjection,
             null,
             null,
-            ContactsContract.Contacts.DISPLAY_NAME_PRIMARY + " ASC LIMIT " + params.loadSize + " OFFSET " + position
+            ContactsContract.Contacts.PHONETIC_NAME + " ASC LIMIT " + params.loadSize + " OFFSET " + position
         )
 
         val contacts: MutableList<Contact> = mutableListOf()
@@ -31,7 +31,7 @@ class ContactPagingSource @Inject constructor(
             it.moveToFirst()
             while (!it.isAfterLast) {
                 val id = it.getColumnIndex(contactsProjection[0])
-                val name = it.getColumnIndex(contactsProjection[1])
+                val name = it.getString(it.getColumnIndexOrThrow(contactsProjection[1]))
                 contacts.add(Contact(id.toLong(), name.toString()))
                 it.moveToNext()
             }
