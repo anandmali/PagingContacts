@@ -23,29 +23,10 @@ class ContactPagingSource @Inject constructor(
         val position = params.key ?: PAGING_INDEX
 
         /**
-         * Contacts source : ContactsContract
+         * Contacts source : ContactsContract; source for pagination data
          * Thi can be source of Network, Room DB, or any source providing the paginated data
          */
-        val cursor = contentResolver.query(
-            ContactsContract.Contacts.CONTENT_URI,
-            contactsProjection,
-            null,
-            null,
-            ContactsContract.Contacts.PHONETIC_NAME + " ASC LIMIT " + params.loadSize + " OFFSET " + position
-        )
-
-        //Read contacts from : ContactsContract
-        val contacts: MutableList<Contact> = mutableListOf()
-        cursor?.let {
-            it.moveToFirst()
-            while (!it.isAfterLast) {
-                val id = it.getColumnIndex(contactsProjection[0])
-                val name = it.getString(it.getColumnIndexOrThrow(contactsProjection[1]))
-                contacts.add(Contact(id.toLong(), name.toString()))
-                it.moveToNext()
-            }
-            it.close()
-        }
+        val contacts = getContacts(params.loadSize, position)
 
         //Create next paging index
         val nextKey = if (contacts.size < PAGING_SIZE) {
@@ -64,6 +45,31 @@ class ContactPagingSource @Inject constructor(
             prevKey = if (position == 1) null else position - 1, //Previous index
             nextKey = nextKey //Next index
         )
+    }
+
+    private fun getContacts(loadSize: Int, position: Int): List<Contact> {
+        val cursor = contentResolver.query(
+            ContactsContract.Contacts.CONTENT_URI,
+            contactsProjection,
+            null,
+            null,
+            ContactsContract.Contacts.PHONETIC_NAME + " ASC LIMIT "
+                    + loadSize + " OFFSET " + position
+        )
+
+        //Read contacts from : ContactsContract
+        val contacts: MutableList<Contact> = mutableListOf()
+        cursor?.let {
+            it.moveToFirst()
+            while (!it.isAfterLast) {
+                val id = it.getColumnIndex(contactsProjection[0])
+                val name = it.getString(it.getColumnIndexOrThrow(contactsProjection[1]))
+                contacts.add(Contact(id.toLong(), name.toString()))
+                it.moveToNext()
+            }
+            it.close()
+        }
+        return contacts
     }
 
     override fun getRefreshKey(state: PagingState<Int, Contact>): Int? {
